@@ -24,21 +24,34 @@ const Index = () => {
   const handlePatientSubmit = (data) => {
     console.log("Patient data received:", data);
     
-    // Simulate ML prediction
-    const riskScore = Math.random() * 100;
-    const prediction = {
-      riskScore: riskScore,
-      riskLevel: riskScore > 70 ? 'High' : riskScore > 40 ? 'Medium' : 'Low',
-      progressionLikelihood: riskScore > 60 ? 'Likely' : 'Unlikely',
-      recommendations: generateRecommendations(riskScore)
-    };
+    let prediction;
+    if (data.prediction) {
+      // Use ML prediction if available
+      prediction = {
+        riskScore: data.prediction.riskScore,
+        riskLevel: data.prediction.riskLevel,
+        progressionLikelihood: data.prediction.progressionLikelihood,
+        recommendations: generateRecommendations(data.prediction.riskScore)
+      };
+    } else {
+      // Fallback to simulation
+      const riskScore = Math.random() * 100;
+      prediction = {
+        riskScore: riskScore,
+        riskLevel: riskScore > 70 ? 'High' : riskScore > 40 ? 'Medium' : 'Low',
+        progressionLikelihood: riskScore > 60 ? 'Likely' : 'Unlikely',
+        recommendations: generateRecommendations(riskScore)
+      };
+    }
     
     setPatientData(data);
     setAnalysisResults(prediction);
     
     toast({
       title: "Analysis Complete",
-      description: "Patient health assessment has been processed successfully.",
+      description: data.prediction ? 
+        "Patient health assessment processed using TensorFlow.js ML model." :
+        "Patient health assessment processed using fallback method.",
     });
   };
 

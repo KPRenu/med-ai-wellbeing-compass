@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -7,6 +6,7 @@ import { Progress } from "@/components/ui/progress";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Upload, Brain, AlertCircle, CheckCircle, X } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
+import { predictMedicalImage } from '@/utils/mlModels';
 
 const ImageAnalysis = () => {
   const [selectedFile, setSelectedFile] = useState(null);
@@ -32,11 +32,26 @@ const ImageAnalysis = () => {
     }
   };
 
-  const simulateImageAnalysis = () => {
+  const analyzeImage = async () => {
+    if (!selectedFile) return;
+    
     setIsAnalyzing(true);
     
-    // Simulate AI processing delay
-    setTimeout(() => {
+    try {
+      console.log("Starting ML image analysis...");
+      const result = await predictMedicalImage(selectedFile);
+      console.log("ML Analysis result:", result);
+      
+      setAnalysisResult(result);
+      
+      toast({
+        title: "Analysis Complete",
+        description: `Medical image analyzed with ${Math.round(result.confidence)}% confidence using TensorFlow.js.`,
+      });
+    } catch (error) {
+      console.error("Error in ML image analysis:", error);
+      
+      // Fallback to simulation if ML fails
       const mockResults = [
         {
           condition: "Normal",
@@ -49,30 +64,20 @@ const ImageAnalysis = () => {
           confidence: 75 + Math.random() * 15,
           description: "Signs of inflammation in lung tissue",
           severity: "high"
-        },
-        {
-          condition: "Fracture",
-          confidence: 90 + Math.random() * 8,
-          description: "Bone fracture detected in the examined area",
-          severity: "medium"
-        },
-        {
-          condition: "Tumor",
-          confidence: 70 + Math.random() * 20,
-          description: "Suspicious mass requiring further investigation",
-          severity: "high"
         }
       ];
       
       const randomResult = mockResults[Math.floor(Math.random() * mockResults.length)];
       setAnalysisResult(randomResult);
-      setIsAnalyzing(false);
       
       toast({
         title: "Analysis Complete",
-        description: `Medical image has been analyzed with ${Math.round(randomResult.confidence)}% confidence.`,
+        description: "Analyzed using fallback method.",
+        variant: "destructive"
       });
-    }, 3000);
+    } finally {
+      setIsAnalyzing(false);
+    }
   };
 
   const clearFile = () => {
@@ -137,19 +142,19 @@ const ImageAnalysis = () => {
               </div>
               
               <Button
-                onClick={simulateImageAnalysis}
+                onClick={analyzeImage}
                 disabled={isAnalyzing}
                 className="w-full bg-purple-600 hover:bg-purple-700"
               >
                 {isAnalyzing ? (
                   <>
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                    Analyzing Image...
+                    Analyzing with TensorFlow.js...
                   </>
                 ) : (
                   <>
                     <Brain className="h-4 w-4 mr-2" />
-                    Analyze Medical Image
+                    Analyze with AI Model
                   </>
                 )}
               </Button>

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -7,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { User, Calendar, Heart } from 'lucide-react';
+import { predictDiseaseProgression } from '@/utils/mlModels';
 
 const PatientForm = ({ onSubmit }) => {
   const [formData, setFormData] = useState({
@@ -31,10 +31,20 @@ const PatientForm = ({ onSubmit }) => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     console.log("Form submitted with data:", formData);
-    onSubmit(formData);
+    
+    try {
+      // Use real ML prediction
+      const prediction = await predictDiseaseProgression(formData);
+      console.log("ML Prediction:", prediction);
+      onSubmit({ ...formData, prediction });
+    } catch (error) {
+      console.error("Error in ML prediction:", error);
+      // Fallback to simulated prediction
+      onSubmit(formData);
+    }
   };
 
   return (
