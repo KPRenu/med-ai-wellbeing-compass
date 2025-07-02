@@ -1,5 +1,19 @@
-
 import * as tf from '@tensorflow/tfjs';
+
+// Define types for ML model results
+export interface DiseaseProgression {
+  riskScore: number;
+  riskLevel: 'High' | 'Medium' | 'Low';
+  progressionLikelihood: 'Likely' | 'Unlikely';
+  confidence: number;
+}
+
+export interface MedicalImageResult {
+  condition: string;
+  confidence: number;
+  description: string;
+  severity: 'low' | 'medium' | 'high';
+}
 
 // Disease progression prediction model
 let diseaseModel: tf.LayersModel | null = null;
@@ -105,7 +119,7 @@ const trainDiseaseModel = async () => {
 };
 
 // Predict disease progression
-export const predictDiseaseProgression = async (patientData: any) => {
+export const predictDiseaseProgression = async (patientData: any): Promise<DiseaseProgression> => {
   const model = await initializeDiseaseModel();
   
   // Normalize patient data
@@ -204,7 +218,7 @@ const trainImageModel = async () => {
 };
 
 // Predict medical image classification
-export const predictMedicalImage = async (imageFile: File) => {
+export const predictMedicalImage = async (imageFile: File): Promise<MedicalImageResult> => {
   const model = await initializeImageModel();
   
   // Convert image to tensor
@@ -235,10 +249,10 @@ export const predictMedicalImage = async (imageFile: File) => {
         const confidence = probabilities[maxIndex] * 100;
         
         const severityMap = {
-          'Normal': 'low',
-          'Pneumonia': 'high',
-          'Fracture': 'medium',
-          'Tumor': 'high'
+          'Normal': 'low' as const,
+          'Pneumonia': 'high' as const,
+          'Fracture': 'medium' as const,
+          'Tumor': 'high' as const
         };
         
         resolve({

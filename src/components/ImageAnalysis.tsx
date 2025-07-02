@@ -1,3 +1,4 @@
+
 import React, { useState, useRef } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -6,17 +7,17 @@ import { Progress } from "@/components/ui/progress";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Upload, Brain, AlertCircle, CheckCircle, X } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
-import { predictMedicalImage } from '@/utils/mlModels';
+import { predictMedicalImage, type MedicalImageResult } from '@/utils/mlModels';
 
 const ImageAnalysis = () => {
-  const [selectedFile, setSelectedFile] = useState(null);
-  const [analysisResult, setAnalysisResult] = useState(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [analysisResult, setAnalysisResult] = useState<MedicalImageResult | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const fileInputRef = useRef(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
-  const handleFileSelect = (event) => {
-    const file = event.target.files[0];
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
     if (file) {
       if (file.type.startsWith('image/')) {
         setSelectedFile(file);
@@ -52,7 +53,7 @@ const ImageAnalysis = () => {
       console.error("Error in ML image analysis:", error);
       
       // Fallback to simulation if ML fails
-      const mockResults = [
+      const mockResults: MedicalImageResult[] = [
         {
           condition: "Normal",
           confidence: 85 + Math.random() * 10,
